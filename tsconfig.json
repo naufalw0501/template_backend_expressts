@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES6",               // Target JavaScript
+    "module": "commonjs",          // Modul untuk Node.js
+    "strict": true,                // Enforce strict type checking
+    "esModuleInterop": true,       // Import modul ES6 dengan benar
+    "skipLibCheck": true,          // Skip pemeriksaan tipe di file library
+    "forceConsistentCasingInFileNames": true, // Pastikan casing nama file konsisten
+    "outDir": "./dist",            // Output file di folder dist
+    "rootDir": "./src"             // Kode sumber berada di folder src
+  },
+  "include": ["src/**/*.ts"],      // Include file TypeScript di folder src
+  "exclude": ["node_modules"]      // Jangan sertakan node_modules
+}

@@ -1,19 +1,9 @@
-import express, { Request, Response } from 'express';
-const app = express();
-const port = 3000;
-const usersRoute = require('./routes/users');
+import app from './app';
 require('dotenv').config();
 
-app.get('/', (req: Request, res: Response) => {
-    res.send(`Environment: ${process.env.NODE_ENV}`);
-});
+const PORT = process.env.APP_PORT || 3000;
+const MODE : "DEVELOPMENT" | "PRODUCTION" = process.env.APP_MODE === "DEVELOPMENT" ? "DEVELOPMENT" : "PRODUCTION";
 
-app.listen(port, () => {
-    if (process.env.NODE_ENV === 'development') {
-        console.log(`Server Running On Development Port ${port}`);
-    } else {
-        console.log(`Server Running On Production Port ${port}. Be Careful !`);
-    }
+app.listen(PORT, () => {
+  console.log(`Server Running On ${MODE} Mode With Port ${PORT}`);
 });
-
-app.use('/users', usersRoute);

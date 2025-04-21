@@ -12,14 +12,14 @@ export const getAllUsers = async (req: Request, res: Response) => {
 };
 
 export const addUser = async (req: Request, res: Response) => {
-    const { username, password } = req.body;
-    if (!username || !password) {
+    const { username } = req.body;
+    if (!username) {
         res.status(400).json({ message: 'Username and Password Must Be Filled' });
         return
     }
 
     try {
-        const userId = await UserModel.insertUser(username, password);
+        const userId = await UserModel.insertUser(username);
         res.status(201).json({ message: 'User Success Added', userId });
     } catch (err) {
         console.error('Error When Add User:', err);

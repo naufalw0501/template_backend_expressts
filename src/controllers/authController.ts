@@ -8,28 +8,27 @@ const JWT_SECRET = process.env.JWT_SECRET || 'wesfedsrgh4e5ywerfs';
 
 export const loginController = async (req: Request, res: Response) => {
     const { username, password } = req.body;
-
     if (!username || !password) {
-        res.status(400).json({ message: 'Username and Password Required' })
+        res.status(400).json({ message: 'Username and Password Required', status: 200 })
         return
     };
 
     try {
         const user = await getUserByUsername(username);
         if (!user) {
-            res.status(401).json({ message: 'Invalid Credentials : Wrong Username' })
+            res.status(401).json({ message: 'Invalid Credentials : Wrong Username', status: 401 })
             return
         };
 
         if (user.password == null) {
             if (password != '1234') {
-                res.status(401).json({ message: 'Invalid Credentials : Wrong Password' })
+                res.status(401).json({ message: 'Invalid Credentials : Wrong Password', status: 401 })
                 return
             }
         } else {
             const passwordMatch = await bcrypt.compare(password, user.password);
             if (!passwordMatch) {
-                res.status(401).json({ message: 'Invalid Credentials : Wrong Password' })
+                res.status(401).json({ message: 'Invalid Credentials : Wrong Password', status: 401 })
                 return
             };
         }
@@ -40,10 +39,10 @@ export const loginController = async (req: Request, res: Response) => {
             { expiresIn: Number(process.env.JWT_EXP_LOGIN) || 3600 }
         );
 
-        res.json({ token, user: user.username });
+        res.json({ token, username: user.username, status: 200 });
     } catch (err) {
         console.error('Login Error:', err);
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ message: 'Internal Server Error', status: 500 });
     }
 };
 
@@ -52,14 +51,14 @@ export const refreshToken = (req: Request, res: Response) => {
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-        res.status(401).json({ message: 'Token Required' });
+        res.status(401).json({ message: 'Token Required', status: 401 });
         return;
     }
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET, { ignoreExpiration: true }) as JwtPayload;
 
-        const currentTime = Math.floor(Date.now() / 1000); // in seconds
+        const currentTime = Math.floor(Date.now() / 1000);  
         if (decoded.exp && decoded.exp > currentTime) {
             const newToken = jwt.sign(
                 { id: decoded.id, username: decoded.username },
@@ -68,17 +67,15 @@ export const refreshToken = (req: Request, res: Response) => {
             );
 
             res.json({
-                message: 'Token Refreshed',
-                token: newToken,
-                username: decoded.username,
-                userId: decoded.id
+                message: 'Token Refreshed', token: newToken, username: decoded.username,
+                userId: decoded.id, status: 200
             });
         } else {
-            res.status(401).json({ message: 'Token Expired, please login again' });
+            res.status(401).json({ message: 'Token Expired, please login again', status: 401 });
         }
     } catch (err) {
         console.error('Refresh Token Error:', err);
-        res.status(403).json({ message: 'Invalid Token' });
+        res.status(403).json({ message: 'Invalid Token', status: "403" });
     }
 };
 
@@ -88,26 +85,26 @@ export const changePassword = async (req: Request, res: Response) => {
     const { old_password, new_password } = req.body;
 
     if (!old_password || !new_password) {
-        res.status(400).json({ message: 'Old and new password are required' });
+        res.status(400).json({ message: 'Old and new password are required', status: 400 });
         return
     }
 
     try {
         const user = await getUserById(userId);
         if (!user) {
-            res.status(404).json({ message: 'User not found' })
+            res.status(404).json({ message: 'User not found', status: 404 })
             return
         };
 
         if (user.password == null) {
             if (old_password != '1234') {
-                res.status(401).json({ message: 'Invalid Credentials : Wrong Password' })
+                res.status(401).json({ message: 'Invalid Credentials : Wrong Password', status: 401 })
                 return
             }
         } else {
             const passwordMatch = await bcrypt.compare(old_password, user.password);
             if (!passwordMatch) {
-                res.status(401).json({ message: 'Invalid Credentials : Wrong Password' })
+                res.status(401).json({ message: 'Invalid Credentials : Wrong Password', status: 401 })
                 return
             };
         }
@@ -115,9 +112,9 @@ export const changePassword = async (req: Request, res: Response) => {
         const hashedPassword = await bcrypt.hash(new_password, 10);
         await updateUserPassword(userId, hashedPassword);
 
-        res.status(200).json({ message: 'Password successfully updated' });
+        res.status(200).json({ message: 'Password successfully updated', status: 200 });
     } catch (err) {
         console.error('Error changing password:', err);
-        res.status(500).json({ message: 'Error changing password', error: err });
+        res.status(500).json({ message: 'Error changing password', error: err, status: 500 });
     }
 };

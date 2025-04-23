@@ -4,13 +4,35 @@ import authRoutes from './routes/authRoutes';
 import cors from "cors";
 
 const app = express();
+
+// ✅ CORS setup
 app.use(cors({
     origin: "http://localhost:4000",
     credentials: true
 }));
-app.use(express.json());
 
-// Prefix semua route users
+// ✅ JSON parser
+app.use(express.json());
+ 
+app.use((req, res, next) => {
+    console.log("➡️  Incoming Request:");
+    console.log("URL:", req.method, req.originalUrl);
+    // console.log("Body:", req.body);
+
+    // Tangkap original method res.send
+    const originalSend = res.send.bind(res);
+
+    res.send = (body) => {
+        console.log("⬅️  Response:");
+        console.log("Status:", res.statusCode);
+        // console.log("Body:", body);
+        return originalSend(body);
+    };
+
+    next();
+});
+
+// ✅ Route
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 

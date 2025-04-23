@@ -58,7 +58,7 @@ export const refreshToken = (req: Request, res: Response) => {
     try {
         const decoded = jwt.verify(token, JWT_SECRET, { ignoreExpiration: true }) as JwtPayload;
 
-        const currentTime = Math.floor(Date.now() / 1000);  
+        const currentTime = Math.floor(Date.now() / 1000);
         if (decoded.exp && decoded.exp > currentTime) {
             const newToken = jwt.sign(
                 { id: decoded.id, username: decoded.username },
@@ -67,15 +67,19 @@ export const refreshToken = (req: Request, res: Response) => {
             );
 
             res.json({
-                message: 'Token Refreshed', token: newToken, username: decoded.username,
-                userId: decoded.id, status: 200
+                message: 'Token Refreshed', status: 200,
+                data: {
+                    token: newToken, 
+                    username: decoded.username,
+                    userId: decoded.id
+                }
             });
         } else {
             res.status(401).json({ message: 'Token Expired, please login again', status: 401 });
         }
     } catch (err) {
         console.error('Refresh Token Error:', err);
-        res.status(403).json({ message: 'Invalid Token', status: "403" });
+        res.status(403).json({ message: 'Invalid Token', status: 403 });
     }
 };
 

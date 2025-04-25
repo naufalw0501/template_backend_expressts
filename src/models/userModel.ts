@@ -4,19 +4,35 @@ import { FieldPacket, ResultSetHeader } from 'mysql2/promise';
 export const getAllUsers = async () => {
   const connection = await dbPool.getConnection();
   try {
-    const [rows] = await connection.query('SELECT * FROM users');
+    const [rows] = await connection.query(`
+      SELECT u.id, u.username, r.role_name
+          FROM users as u
+          LEFT JOIN roles as r
+          ON u.id_role = r.id;
+      `);
     return rows;
   } finally {
     connection.release();
   }
 };
 
-export const insertUser = async (username: string) => {
+export const getAllRoles = async () => {
+  const connection = await dbPool.getConnection();
+  try {
+    const [rows] = await connection.query(`
+      SELECT id, role_name from roles`);
+    return rows;
+  } finally {
+    connection.release();
+  }
+};
+
+export const insertUser = async (username: string, id_role: number) => {
   const connection = await dbPool.getConnection();
   try {
     const [result]: [ResultSetHeader, FieldPacket[]] = await connection.query(
-      'INSERT INTO users (username ) VALUES (:username )',
-      { username }
+      'INSERT INTO users (username, id_role ) VALUES (:username, :id_role )',
+      { username, id_role }
     );
     return result.insertId;
   } finally {
@@ -24,7 +40,7 @@ export const insertUser = async (username: string) => {
   }
 };
 
-export const updateUser = async (id: number, username?: string, password?: string) => {
+export const updateUser = async (id: number, username?: string, id_role?: number) => {
   const connection = await dbPool.getConnection();
   try {
     let query = 'UPDATE users SET ';
@@ -33,9 +49,9 @@ export const updateUser = async (id: number, username?: string, password?: strin
       query += 'username = :username';
       params.username = username;
     }
-    if (password !== undefined) {
-      query += (params.username ? ', ' : '') + 'password = :password';
-      params.password = password;
+    if (id_role !== undefined) {
+      query += (params.username ? ', ' : '') + 'id_role = :id_role';
+      params.id_role = id_role;
     }
     query += ' WHERE id = :id';
     params.id = id;
@@ -60,31 +76,3 @@ export const deleteUser = async (id: number) => {
   }
 };
 
-interface UserInterface {
-  id: number;
-  username: string;
-  password: string;
-}
-export const getUserById = async (id: number): Promise<UserInterface | null> => {
-  const connection = await dbPool.getConnection();
-  try {
-    const [rows] = await connection.query('SELECT * FROM users WHERE id = :id', { id });
-    const userRows = rows as UserInterface[];
-    return userRows.length > 0 ? userRows[0] : null;
-  } finally {
-    connection.release();
-  }
-};
-
-export const updateUserPassword = async (id: number, newPassword: string) => {
-  const connection = await dbPool.getConnection();
-  try {
-    const [result]: [ResultSetHeader, FieldPacket[]] = await connection.query(
-      'UPDATE users SET password = :password WHERE id = :id',
-      { password: newPassword, id }
-    );
-    return result.affectedRows;
-  } finally {
-    connection.release();
-  }
-};

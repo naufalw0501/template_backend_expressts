@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { getUserByUsername } from '../models/authModel';
-import { getUserById, updateUserPassword } from '../models/userModel'
+import * as AuthModel from '../models/authModel';
+import {  } from '../models/userModel'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'wesfedsrgh4e5ywerfs';
 
@@ -14,7 +14,7 @@ export const loginController = async (req: Request, res: Response) => {
     };
 
     try {
-        const user = await getUserByUsername(username);
+        const user = await AuthModel.getUserByUsername(username);
         if (!user) {
             res.status(401).json({ message: 'Invalid Credentials : Wrong Username', status: 401 })
             return
@@ -34,7 +34,7 @@ export const loginController = async (req: Request, res: Response) => {
         }
 
         const token = jwt.sign(
-            { id: user.id, username: user.username },
+            { id: user.id, username: user.username, role_name: user.role_name },
             JWT_SECRET,
             { expiresIn: Number(process.env.JWT_EXP_LOGIN) || 3600 }
         );
@@ -71,6 +71,7 @@ export const refreshToken = (req: Request, res: Response) => {
                 data: {
                     token: newToken, 
                     username: decoded.username,
+                    role_name: decoded.role_name,
                     userId: decoded.id
                 }
             });
@@ -94,7 +95,7 @@ export const changePassword = async (req: Request, res: Response) => {
     }
 
     try {
-        const user = await getUserById(userId);
+        const user = await AuthModel.getUserById(userId);
         if (!user) {
             res.status(404).json({ message: 'User not found', status: 404 })
             return
@@ -114,7 +115,7 @@ export const changePassword = async (req: Request, res: Response) => {
         }
 
         const hashedPassword = await bcrypt.hash(new_password, 10);
-        await updateUserPassword(userId, hashedPassword);
+        await AuthModel.updateUserPassword(userId, hashedPassword);
 
         res.status(200).json({ message: 'Password successfully updated', status: 200 });
     } catch (err) {

@@ -5,6 +5,7 @@ import { authenticateToken } from '../middlewares/authMiddleware';
 const router = express.Router();
 
 router.get('/', authenticateToken, userController.getAllUsers);
+router.get('/roles', authenticateToken, userController.getAllRoles);
 router.post('/add', authenticateToken, userController.addUser);
 router.put('/update', authenticateToken, userController.updateUser);
 router.delete('/delete', authenticateToken, userController.deleteUser);

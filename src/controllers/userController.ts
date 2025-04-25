@@ -11,15 +11,25 @@ export const getAllUsers = async (req: Request, res: Response) => {
     }
 };
 
+export const getAllRoles = async (req: Request, res: Response) => {
+    try {
+        const users = await UserModel.getAllRoles();
+        res.json({ message: "Get Data Success", status: 200, data: users });
+    } catch (err) {
+        console.error('Error When Get Users:', err);
+        res.status(500).json({ message: 'Error When Get Users', status: 500, error: err });
+    }
+};
+
 export const addUser = async (req: Request, res: Response) => {
-    const { username } = req.body;
-    if (!username) {
-        res.status(400).json({ message: 'Username and Password Must Be Filled' });
+    const { username, id_role } = req.body;
+    if (!username || !id_role) {
+        res.status(400).json({ message: 'Username & Role Must Be Filled' });
         return
     }
 
     try {
-        const userId = await UserModel.insertUser(username);
+        const userId = await UserModel.insertUser(username, id_role);
         res.status(201).json({ message: 'User Success Added', status: 201, userId });
     } catch (err) {
         console.error('Error When Add User:', err);
@@ -28,14 +38,14 @@ export const addUser = async (req: Request, res: Response) => {
 };
 
 export const updateUser = async (req: Request, res: Response) => {
-    const { id, username, password } = req.body;
+    const { id, username, id_role } = req.body;
     if (!id) {
         res.status(400).json({ message: 'ID Must Be Filled', status: 400, })
         return
     };
 
     try {
-        const affectedRows = await UserModel.updateUser(id, username, password);
+        const affectedRows = await UserModel.updateUser(id, username, id_role);
         if (affectedRows === 0) {
             res.status(404).json({ message: 'User To Update Not Found', status: 404, });
             return;

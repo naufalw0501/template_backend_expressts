@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import * as AuthModel from '../models/authModel';
-import {  } from '../models/userModel'
+import { } from '../models/userModel'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'wesfedsrgh4e5ywerfs';
 
@@ -32,14 +32,13 @@ export const loginController = async (req: Request, res: Response) => {
                 return
             };
         }
-
         const token = jwt.sign(
             { id: user.id, username: user.username, role_name: user.role_name },
             JWT_SECRET,
             { expiresIn: Number(process.env.JWT_EXP_LOGIN) || 3600 }
         );
 
-        res.json({ token, username: user.username, status: 200 });
+        res.json({ token, username: user.username, role_name: user.role_name, status: 200 });
     } catch (err) {
         console.error('Login Error:', err);
         res.status(500).json({ message: 'Internal Server Error', status: 500 });
@@ -61,7 +60,7 @@ export const refreshToken = (req: Request, res: Response) => {
         const currentTime = Math.floor(Date.now() / 1000);
         if (decoded.exp && decoded.exp > currentTime) {
             const newToken = jwt.sign(
-                { id: decoded.id, username: decoded.username },
+                { id: decoded.id, username: decoded.username, role_name: decoded.role_name },
                 JWT_SECRET,
                 { expiresIn: Number(process.env.JWT_EXP_REFRESH) || 3600 }
             );
@@ -69,7 +68,7 @@ export const refreshToken = (req: Request, res: Response) => {
             res.json({
                 message: 'Token Refreshed', status: 200,
                 data: {
-                    token: newToken, 
+                    token: newToken,
                     username: decoded.username,
                     role_name: decoded.role_name,
                     userId: decoded.id

@@ -16,8 +16,8 @@ export const getAllRoles = async (req: Request, res: Response) => {
         const users = await UserModel.getAllRoles();
         res.json({ message: "Get Data Success", status: 200, data: users });
     } catch (err) {
-        console.error('Error When Get Users:', err);
-        res.status(500).json({ message: 'Error When Get Users', status: 500, error: err });
+        console.error('Error When Get Roles:', err);
+        res.status(500).json({ message: 'Error When Get Roles', status: 500, error: err });
     }
 };
 

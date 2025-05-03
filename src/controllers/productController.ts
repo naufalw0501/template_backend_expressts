@@ -35,7 +35,7 @@ export const addProduct = async (req: Request, res: Response) => {
     if (!product_detail.product_name || !product_detail.description || !product_detail.lowest_price || !product_detail.id_category ||
         !product_detail.highest_price || !product_detail.size || !product_detail.notes || !product_detail.link_shopee || !product_detail.link_tokopedia || 
         !product_detail.image_file || !product_detail) {
-        res.status(400).json({ message: 'Username & Role Must Be Filled' });
+        res.status(400).json({ message: 'All Form Must Be Filled' });
         return
     }
 

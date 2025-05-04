@@ -4,14 +4,15 @@ import { FieldPacket, ResultSetHeader } from 'mysql2/promise';
 export const getUserByUsername = async (username: string) => {
   const connection = await dbPool.getConnection();
   try {
-    const [rows]: any = await connection.query(
+    const [rows] : any = await connection.query(
       `SELECT u.id, u.username, r.role_name
           FROM users as u
           LEFT JOIN roles as r
-          ON u.id_role = r.id  WHERE u.username = :username;` ,
-      { username }
+          ON u.id_role = r.id
+       WHERE username = ?`,
+      [username]
     );
-    return rows[0]; // asumsi username unique
+    return rows[0]; // username must unique
   } finally {
     connection.release();
   }

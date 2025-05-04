@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as ProductModel from '../models/productModel'; 
+import * as ProductModel from '../models/productModel';
 import { FormAddProductInterface, FormUpdateProductInterface } from '../inteface/productInterface';
 
 export const getAllProducts = async (req: Request, res: Response) => {
@@ -23,24 +23,32 @@ export const getAllCategories = async (req: Request, res: Response) => {
 };
 
 export const addProduct = async (req: Request, res: Response) => {
-    const { product_name, description, lowest_price, id_category,
-        highest_price, size, notes, link_shopee, link_tokopedia, image_file
-     } = req.body; 
-    
-    const product_detail : FormAddProductInterface = { product_name, description, lowest_price, id_category,
-        highest_price, size, notes, link_shopee, link_tokopedia, 
-        image_file
-     }
+    const {
+        product_name, description, lowest_price, id_category,
+        highest_price, size, notes, link_shopee, link_tokopedia
+    } = req.body;
 
-    if (!product_detail.product_name || !product_detail.description || !product_detail.lowest_price || !product_detail.id_category ||
-        !product_detail.highest_price || !product_detail.size || !product_detail.notes || !product_detail.link_shopee || !product_detail.link_tokopedia || 
-        !product_detail.image_file || !product_detail) {
-        res.status(400).json({ message: 'All Form Must Be Filled' });
+    if (req.file == null) {
+        console.error('File Must Be Uploaded:');
+        res.status(500).json({ message: 'File Must Be Uploaded', status: 500 });
         return
     }
 
+    const image_file = req.file.filename;
+
+    const product_detail: FormAddProductInterface = {
+        product_name, description, lowest_price: Number(lowest_price), id_category: Number(id_category),
+        highest_price: Number(highest_price), size, notes, link_shopee, link_tokopedia, image_file
+    };
+
+    if (!product_name || !description || !lowest_price || !id_category ||
+        !highest_price || !size || !notes || !link_shopee || !link_tokopedia || !image_file) {
+        res.status(400).json({ message: 'All Form Must Be Filled' });
+        return;
+    }
+
     try {
-        const productId = await ProductModel.insertProduct(product_detail); 
+        const productId = await ProductModel.insertProduct(product_detail);
         res.status(201).json({ message: 'Product Success Added', status: 201, productId });
     } catch (err) {
         console.error('Error When Add Product:', err);
@@ -48,25 +56,31 @@ export const addProduct = async (req: Request, res: Response) => {
     }
 };
 
-export const updateProduct = async (req: Request, res: Response) => {
-    const { id, product_name, description, lowest_price, id_category,
-        highest_price, size, notes, link_shopee, link_tokopedia, image_file
-     } = req.body; 
 
-     const product_detail : FormUpdateProductInterface = { id, product_name, description, lowest_price, id_category,
-        highest_price, size, notes, link_shopee, link_tokopedia, 
+export const updateProduct = async (req: Request, res: Response) => {
+    const {
+        id, product_name, description, lowest_price, id_category,
+        highest_price, size, notes, link_shopee, link_tokopedia
+    } = req.body;
+
+    const image_file = req.file ? req.file.filename : undefined;
+
+    const product_detail: FormUpdateProductInterface = {
+        id: Number(id),
+        product_name, description, lowest_price: Number(lowest_price), id_category: Number(id_category),
+        highest_price: Number(highest_price), size, notes, link_shopee, link_tokopedia,
         image_file
-     }
+    };
 
     if (!product_detail.id) {
-        res.status(400).json({ message: 'ID Must Be Filled', status: 400, })
-        return
-    };
+        res.status(400).json({ message: 'ID Must Be Filled', status: 400 });
+        return;
+    }
 
     try {
         const affectedRows = await ProductModel.updateProduct(product_detail);
         if (affectedRows === 0) {
-            res.status(404).json({ message: 'Product To Update Not Found', status: 404, });
+            res.status(404).json({ message: 'Product To Update Not Found', status: 404 });
             return;
         }
         res.status(200).json({ message: 'Product Success Updated', status: 200, affectedRows });
@@ -75,6 +89,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error When Update Product', status: 500, error: err });
     }
 };
+
 
 export const deleteProduct = async (req: Request, res: Response) => {
     const { id } = req.body;

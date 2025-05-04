@@ -5,6 +5,6 @@ node_modules
 certs/*
 logs/*
 tmp/*
-uploads/*
+src/uploads/products/*
 
 !.gitignore

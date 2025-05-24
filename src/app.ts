@@ -78,4 +78,15 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/files', fileRoutes);
 
+// ✅ Build Routing
+try {
+    const buildPath = path.join(__dirname, '../build');
+    app.use(express.static(buildPath));
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(buildPath, 'index.html'));
+    });
+} catch (err) {
+    console.error("🚨 Error while serving build folder:", err);
+};
+
 export default app;

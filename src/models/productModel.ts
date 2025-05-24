@@ -1,13 +1,13 @@
 import { dbPool } from '../config/initdbMysql';
 import { FieldPacket, ResultSetHeader } from 'mysql2/promise';
-import { FormAddProductInterface, FormUpdateProductInterface } from '../inteface/productInterface';
+import { FormAddProductInterface, FormUpdateProductInterface } from '../interface/productInterface';
 
 
 export const getAllProducts = async () => {
   const connection = await dbPool.getConnection();
   try {
     const [rows] = await connection.query(`
-      SELECT p.id, p.product_name, p.description, p.lowest_price, p.highest_price , p.size, p.notes,
+      SELECT p.id, p.product_name, p.id_category, p.description, p.lowest_price, p.highest_price , p.size, p.notes,
           p.link_shopee, p.link_tokopedia, p.created_at, p.updated_at, p.image_file, c.category_name
       FROM products as p
       LEFT JOIN product_categories as c

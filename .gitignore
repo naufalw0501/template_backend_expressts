@@ -1,5 +1,7 @@
 .env
 package-lock.json
+build
+dist
 node_modules
 
 certs/*

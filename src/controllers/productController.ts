@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import * as ProductModel from '../models/productModel';
-import { FormAddProductInterface, FormUpdateProductInterface } from '../inteface/productInterface';
+import { FormAddProductInterface, FormUpdateProductInterface } from '../interface/productInterface';
+import { dbPool } from '../config/initdbMysql';
+import path from 'path';
+import fs from 'fs';
 
 export const getAllProducts = async (req: Request, res: Response) => {
     try {
@@ -78,11 +81,25 @@ export const updateProduct = async (req: Request, res: Response) => {
     }
 
     try {
+        const connection = await dbPool.getConnection();
+        const [rows]: any = await connection.query('SELECT image_file FROM products WHERE id = ?', [product_detail.id]);
+        connection.release();
+
+        const oldImageFile = rows?.[0]?.image_file;
+
+        if (req.file && oldImageFile) {
+            const oldImagePath = path.join(__dirname, '../uploads/products', oldImageFile);
+            if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+            }
+        }
+
         const affectedRows = await ProductModel.updateProduct(product_detail);
         if (affectedRows === 0) {
             res.status(404).json({ message: 'Product To Update Not Found', status: 404 });
             return;
         }
+
         res.status(200).json({ message: 'Product Success Updated', status: 200, affectedRows });
     } catch (err) {
         console.error('Error When Update Product:', err);
